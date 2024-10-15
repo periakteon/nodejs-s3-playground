@@ -1,0 +1,32 @@
+import multer from "multer";
+import fs from "fs";
+import path from "path";
+
+const UPLOAD_DIR = "uploads/";
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+        cb(null, UPLOAD_DIR);
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+        cb(null, `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`);
+    },
+});
+
+export const upload = multer({
+    storage: storage,
+    limits: {
+        fileSize: MAX_FILE_SIZE,
+    },
+    fileFilter: (req, file, cb) => {
+        const allowedMimes = ["image/jpeg", "image/png", "image/gif"];
+        if (allowedMimes.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error("Invalid file type. Only JPEG, PNG and GIF are allowed."));
+        }
+    },
+});

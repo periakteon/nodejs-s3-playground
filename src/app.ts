@@ -69,15 +69,16 @@ export class App {
         this.app.use(morgan(LOG_FORMAT, { stream }));
         this.app.use(helmet());
         this.app.use(express.json());
-        this.app.use(express.urlencoded({ extended: true }));
+        this.app.use(express.urlencoded({ extended: false }));
     }
 
     private initializeRoutes(controllers: Function[]) {
         useExpressServer(this.app, {
             controllers,
             defaultErrorHandler: false,
-            // routePrefix: "/api/v1",
             cors: false,
+            classTransformer: true,
+            validation: true,
         });
     }
 

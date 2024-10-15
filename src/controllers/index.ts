@@ -2,6 +2,7 @@ import { Response } from "express";
 import { Service } from "typedi";
 import { Get, JsonController, Res } from "routing-controllers";
 import { APP_NAME } from "@/config/env";
+import { UploadController } from "./upload/upload.controller";
 
 @Service()
 @JsonController("/health")
@@ -12,4 +13,4 @@ class HealthController {
     }
 }
 
-export const Controllers = [HealthController];
+export const Controllers = [HealthController, UploadController];
