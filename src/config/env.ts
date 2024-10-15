@@ -10,11 +10,11 @@ const environmentSchema = z.object({
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 
     // Database configuration
-    // MONGO_CONNECTION_URL: z
-    //     .string()
-    //     .default(
-    //         "mongodb+srv://acc-dev:CookieTheSupercat@acc-svc-dev.htnprwp.mongodb.net/account-service?retryWrites=true&w=majority&appName=acc-svc-dev"
-    //     ),
+    MONGO_CONNECTION_URL: z
+        .string()
+        .default(
+            "mongodb+srv://acc-dev:CookieTheSupercat@acc-svc-dev.htnprwp.mongodb.net/account-service?retryWrites=true&w=majority&appName=acc-svc-dev"
+        ),
 
     // CORS configuration
     // CORS_ORIGIN: z.string().default("*"),
@@ -55,7 +55,7 @@ export const {
     HOST,
     PORT,
     NODE_ENV,
-    // MONGO_CONNECTION_URL,
+    MONGO_CONNECTION_URL,
     // AWS_S3_BUCKET,
     // AWS_S3_REGION,
     // AWS_S3_ACCESS_KEY,
