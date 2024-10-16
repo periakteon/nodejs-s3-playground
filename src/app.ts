@@ -3,7 +3,7 @@ import express from "express";
 import { useContainer, useExpressServer } from "routing-controllers";
 import Container from "typedi";
 import morgan from "morgan";
-import { NODE_ENV, PORT, LOG_FORMAT } from "@config/env";
+import { NODE_ENV, PORT, LOG_FORMAT, HOST } from "@config/env";
 import { ErrorMiddleware } from "@/middlewares/error.middleware";
 import { logger, stream } from "@/utils/logger";
 import helmet from "helmet";
@@ -12,6 +12,7 @@ import { MongoDB } from "@/utils/db";
 export class App {
     public app: express.Application;
     public env: string;
+    public host: string;
     public port: string | number;
     private mongodb: MongoDB;
 
@@ -19,8 +20,8 @@ export class App {
         // initialize express app
         this.app = express();
         this.env = NODE_ENV ?? "development";
+        this.host = HOST ?? "localhost";
         this.port = PORT ?? 9001;
-
         // initialize MongoDB instance
         this.mongodb = MongoDB.getInstance();
 
@@ -42,7 +43,7 @@ export class App {
         this.app.listen(this.port, () => {
             logger.info(`=================================`);
             logger.info(`======= ENV: ${this.env} =======`);
-            logger.info(`🚀 App listening on the port ${this.port}`);
+            logger.info(`🚀 App listening on the port ${this.host}:${this.port}`);
             logger.info(`=================================`);
         });
     }

@@ -1,4 +1,4 @@
-import { MongoClient, Db } from "mongodb";
+import { MongoClient, Db, Collection } from "mongodb";
 import { MONGO_CONNECTION_URL } from "@config/env";
 import { logger } from "@/utils/logger";
 
@@ -36,6 +36,13 @@ export class MongoDB {
             throw new Error("Database not connected. Call connect() first.");
         }
         return this.db;
+    }
+
+    public getCollection<T>(collectionName: string): Collection<T> {
+        if (!this.db) {
+            throw new Error("Database not connected. Call connect() first.");
+        }
+        return this.db.collection<T>(collectionName);
     }
 
     public async disconnect(): Promise<void> {

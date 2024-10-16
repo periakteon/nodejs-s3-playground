@@ -1,6 +1,6 @@
 import { IsString, IsNotEmpty } from "class-validator";
 
-export class UploadDto {
+export class REQ_UploadDto {
     @IsString()
     @IsNotEmpty()
     firstName: string;

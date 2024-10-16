@@ -1,13 +1,16 @@
-import { JsonController, Post, Body, Res, UseBefore } from "routing-controllers";
+import { JsonController, Post, Get, Body, Param, Res, UseBefore } from "routing-controllers";
 import { Service } from "typedi";
-import { UploadDto } from "@/dtos/upload.dto";
+import { REQ_UploadDto } from "@/dtos/upload.dto";
 import { Response } from "express";
 import { upload } from "@/config/multer.config";
 import { logger } from "@/utils/logger";
+import { UploadService } from "@/services/upload.service";
 
 @Service()
 @JsonController("/upload")
 export class UploadController {
+    constructor(private uploadService: UploadService) {}
+
     @Post()
     @UseBefore(upload.single("photo"))
     async uploadFile(
@@ -19,7 +22,7 @@ export class UploadController {
                 },
             },
         })
-        body: UploadDto,
+        body: REQ_UploadDto,
         @Res() response: Response
     ) {
         try {
@@ -32,25 +35,72 @@ export class UploadController {
                 });
             }
 
-            logger.info(`File uploaded successfully: ${file.filename}`);
+            const result = await this.uploadService.saveUpload(body, file.filename);
+
+            logger.info(`File uploaded and saved to database: ${file.filename}`);
 
             return response.status(200).json({
                 success: true,
-                message: "File uploaded successfully",
+                message: "File uploaded and saved successfully",
                 data: {
-                    filename: file.filename,
-                    originalName: file.originalname,
-                    size: file.size,
-                    mimetype: file.mimetype,
-                    firstName: body.firstName,
-                    lastName: body.lastName,
+                    _id: result._id,
+                    filename: result.filename,
+                    url: result.url,
+                    firstName: result.firstName,
+                    lastName: result.lastName,
+                    createdAt: result.createdAt,
+                    updatedAt: result.updatedAt,
                 },
             });
         } catch (error) {
-            logger.error("File upload failed", error);
+            logger.error("File upload and save failed", error);
             return response.status(500).json({
                 success: false,
-                message: "File upload failed",
+                message: "File upload and save failed",
+                error: error.message,
+            });
+        }
+    }
+
+    @Get("/all")
+    async getAllUploads(@Res() response: Response) {
+        try {
+            const uploads = await this.uploadService.getAllUploads();
+            return response.status(200).json({
+                success: true,
+                data: uploads,
+            });
+        } catch (error) {
+            logger.error("Failed to retrieve all uploads", error);
+            return response.status(500).json({
+                success: false,
+                message: "Failed to retrieve all uploads",
+                error: error.message,
+            });
+        }
+    }
+
+    @Get("/:id")
+    async getUpload(@Param("id") id: string, @Res() response: Response) {
+        try {
+            const upload = await this.uploadService.getUploadById(id);
+
+            if (!upload) {
+                return response.status(404).json({
+                    success: false,
+                    message: "Upload not found",
+                });
+            }
+
+            return response.status(200).json({
+                success: true,
+                data: upload,
+            });
+        } catch (error) {
+            logger.error(`Failed to retrieve upload with id ${id}`, error);
+            return response.status(500).json({
+                success: false,
+                message: "Failed to retrieve upload",
                 error: error.message,
             });
         }
