@@ -10,7 +10,7 @@
         "dev": "cross-env NODE_ENV=development ts-node-dev -r tsconfig-paths/register --respawn --transpile-only src/server.ts",
         "lint": "eslint .",
         "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\"",
-        "start": "node ./dist/index.js",
+        "start": "node ./dist/server.js",
         "build": "cross-env NODE_ENV=production tsc --build"
     },
     "keywords": [],
