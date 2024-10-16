@@ -5,6 +5,7 @@ import { Response } from "express";
 import { upload } from "@/config/multer.config";
 import { logger } from "@/utils/logger";
 import { UploadService } from "@/services/upload.service";
+import { HttpException } from "@/exceptions/HttpException";
 
 @Service()
 @JsonController("/upload")
@@ -53,11 +54,17 @@ export class UploadController {
                 },
             });
         } catch (error) {
-            logger.error("File upload and save failed", error);
+            if (error instanceof HttpException) {
+                logger.error(`File upload failed: ${error.message}`);
+                return response.status(error.status).json({
+                    success: false,
+                    message: error.message,
+                });
+            }
+            logger.error("Unexpected error during file upload", error);
             return response.status(500).json({
                 success: false,
-                message: "File upload and save failed",
-                error: error.message,
+                message: "An unexpected error occurred during file upload",
             });
         }
     }

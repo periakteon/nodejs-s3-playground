@@ -84,6 +84,8 @@ export class App {
     }
 
     private initializeErrorHandling() {
-        this.app.use(ErrorMiddleware);
+        this.app.use((err: unknown, req: express.Request, res: express.Response, next: express.NextFunction) => {
+            ErrorMiddleware(err, req, res, next);
+        });
     }
 }
