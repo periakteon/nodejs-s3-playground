@@ -36,9 +36,9 @@ export class UploadController {
                 });
             }
 
-            const result = await this.uploadService.saveUpload(body, file.filename);
+            const result = await this.uploadService.saveUpload(body, file);
 
-            logger.info(`File uploaded and saved to database: ${file.filename}`);
+            logger.info(`File uploaded and saved to S3: ${result.filename}`);
 
             return response.status(200).json({
                 success: true,

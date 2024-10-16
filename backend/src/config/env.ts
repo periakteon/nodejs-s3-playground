@@ -21,10 +21,10 @@ const environmentSchema = z.object({
     // CORS_CREDENTIALS: z.coerce.boolean().default(true),
 
     // AWS S3 configuration
-    // AWS_S3_BUCKET: z.string(),
-    // AWS_S3_REGION: z.string(),
-    // AWS_S3_ACCESS_KEY: z.string(),
-    // AWS_S3_SECRET_KEY: z.string(),
+    AWS_S3_BUCKET: z.string().default("s3-file-service-dev-masum"),
+    AWS_S3_REGION: z.string().default("eu-central-1"),
+    AWS_S3_ACCESS_KEY: z.string(),
+    AWS_S3_SECRET_KEY: z.string(),
 
     // Logging configuration
     LOG_DIR: z.string().default("../logs"),
@@ -56,10 +56,10 @@ export const {
     PORT,
     NODE_ENV,
     MONGO_CONNECTION_URL,
-    // AWS_S3_BUCKET,
-    // AWS_S3_REGION,
-    // AWS_S3_ACCESS_KEY,
-    // AWS_S3_SECRET_KEY,
+    AWS_S3_BUCKET,
+    AWS_S3_REGION,
+    AWS_S3_ACCESS_KEY,
+    AWS_S3_SECRET_KEY,
     LOG_DIR,
     LOG_FORMAT,
     // CORS_ORIGIN,
