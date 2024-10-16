@@ -25,6 +25,9 @@ import { Input } from "~/components/ui/input";
 import { useDropzone } from "react-dropzone";
 import Image from "next/image";
 import { toast } from "sonner";
+import { UploadResponse, useUploadMutation } from "~/hooks/useUploadMutation";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Separator } from "~/components/ui/separator";
 
 const formSchema = z.object({
   firstName: z
@@ -49,9 +52,21 @@ const formSchema = z.object({
     }),
 });
 
+const queryClient = new QueryClient();
+
 export default function Page() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <UploadForm />
+    </QueryClientProvider>
+  );
+}
+
+function UploadForm() {
   const [preview, setPreview] = useState<string | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
+  const [uploadedData, setUploadedData] = useState<UploadResponse | null>(null);
+
+  const { mutate, isPending, isError, error } = useUploadMutation();
 
   const { acceptedFiles, getRootProps, getInputProps } = useDropzone({
     accept: {
@@ -75,21 +90,30 @@ export default function Page() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsUploading(true);
-    const formData = {
-      ...values,
-      file: acceptedFiles[0],
-    };
+    if (acceptedFiles.length === 0) {
+      toast.error("Please select a file to upload");
+      return;
+    }
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    console.log(formData);
-    setIsUploading(false);
-    toast.success("Upload successful");
+    mutate(
+      {
+        ...values,
+        photo: acceptedFiles[0],
+      },
+      {
+        onSuccess: (data) => {
+          setUploadedData(data);
+          form.reset();
+          setPreview(null);
+          toast.success("Upload successful");
+        },
+        onError: (error) => {
+          toast.error(`Upload failed: ${error.message}`);
+        },
+      }
+    );
   }
 
-  // Clean up the preview URL when component unmounts
   useEffect(() => {
     return () => {
       if (preview) {
@@ -160,21 +184,53 @@ export default function Page() {
                   </div>
                 )}
               </div>
-              {acceptedFiles.length > 0 && (
+              {acceptedFiles.length > 0 && preview && (
                 <div className="mt-2 text-sm text-muted-foreground">
                   <p className="truncate">File: {acceptedFiles[0].name}</p>
                   <p>Size: {acceptedFiles[0].size} bytes</p>
                 </div>
               )}
               <Button
-                disabled={isUploading || acceptedFiles.length === 0}
+                disabled={isPending || acceptedFiles.length === 0}
                 type="submit"
                 className="w-full"
               >
-                {isUploading ? "Uploading..." : "Submit"}
+                {isPending ? "Uploading..." : "Submit"}
               </Button>
             </form>
           </Form>
+          {uploadedData && (
+            <>
+              <Separator className="my-4" />
+              <div>
+                <h3 className="text-lg font-semibold">Upload Result:</h3>
+                <div className="mt-2">
+                  <p className="text-sm text-muted-foreground">
+                    Link:
+                    <a
+                      href={uploadedData.data.url}
+                      className="text-primary underline"
+                    >
+                      {uploadedData.data.url}
+                    </a>
+                  </p>
+                </div>
+                <div className="flex justify-center my-4">
+                  <Image
+                    src={uploadedData.data.url}
+                    className="rounded-md"
+                    alt="Uploaded"
+                    width={750}
+                    height={750}
+                  />
+                </div>
+                <pre className="mt-2 p-4 bg-gray-100 rounded-md overflow-auto">
+                  {JSON.stringify(uploadedData, null, 2)}
+                </pre>
+              </div>
+            </>
+          )}
+          {isError && <div>Error: {error.message}</div>}
         </CardContent>
       </Card>
     </div>

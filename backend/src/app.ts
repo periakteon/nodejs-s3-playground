@@ -77,7 +77,7 @@ export class App {
         useExpressServer(this.app, {
             controllers,
             defaultErrorHandler: false,
-            cors: false,
+            cors: true,
             classTransformer: true,
             validation: true,
         });
