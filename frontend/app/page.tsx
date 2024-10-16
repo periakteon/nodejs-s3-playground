@@ -24,6 +24,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { useDropzone } from "react-dropzone";
 import Image from "next/image";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   firstName: z
@@ -85,6 +86,7 @@ export default function Page() {
 
     console.log(formData);
     setIsUploading(false);
+    toast.success("Upload successful");
   }
 
   // Clean up the preview URL when component unmounts
@@ -136,7 +138,7 @@ export default function Page() {
               />
               <div
                 {...getRootProps()}
-                className="flex flex-col h-72 items-center justify-center rounded-md border-2 border-dashed border-muted transition-colors hover:border-primary"
+                className="flex flex-col h-60 items-center justify-center rounded-md border-2 border-dashed border-muted transition-colors hover:border-primary"
               >
                 <Input {...getInputProps()} />
                 {preview ? (
@@ -148,20 +150,6 @@ export default function Page() {
                       objectFit="contain"
                       className="rounded-md"
                     />
-                  </div>
-                ) : acceptedFiles.length > 0 ? (
-                  <div className="grid gap-2">
-                    {acceptedFiles.map((file) => (
-                      <div
-                        key={file.name}
-                        className="flex items-center justify-between rounded-md bg-muted/40 px-4 py-2"
-                      >
-                        <div className="truncate">{file.name}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {file.size} bytes
-                        </div>
-                      </div>
-                    ))}
                   </div>
                 ) : (
                   <div className="text-center">
