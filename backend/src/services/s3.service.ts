@@ -24,8 +24,7 @@ export class S3Service {
             Key: `uploads/${new Date().toLocaleDateString("tr-TR")}/${uuidv4()}-${file.originalname}`,
             Body: file.buffer,
             ContentType: file.mimetype,
-            // I think it's not necessary because it works without it?
-            // ACL: "public-read",
+            ACL: "public-read",
         };
 
         try {

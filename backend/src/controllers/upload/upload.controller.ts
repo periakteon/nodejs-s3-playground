@@ -1,11 +1,11 @@
-import { JsonController, Post, Get, Body, Param, Res, UseBefore } from "routing-controllers";
+import { JsonController, Post, Get, Body, Param, Res, UploadedFile } from "routing-controllers";
 import { Service } from "typedi";
 import { REQ_UploadDto } from "@/dtos/upload.dto";
 import { Response } from "express";
-import { upload } from "@/config/multer.config";
 import { logger } from "@/utils/logger";
 import { UploadService } from "@/services/upload.service";
 import { HttpException } from "@/exceptions/HttpException";
+import { Express } from "express";
 
 @Service()
 @JsonController("/upload")
@@ -13,7 +13,6 @@ export class UploadController {
     constructor(private uploadService: UploadService) {}
 
     @Post()
-    @UseBefore(upload.single("photo"))
     async uploadFile(
         @Body({
             validate: {
@@ -24,12 +23,14 @@ export class UploadController {
             },
         })
         body: REQ_UploadDto,
-        @Res() response: Response
+        @UploadedFile("photo")
+        file: Express.Multer.File,
+        @Res()
+        response: Response
     ) {
         try {
-            const { file } = response.req;
-
             if (!file) {
+                logger.warn("Upload attempt with no file");
                 return response.status(400).json({
                     success: false,
                     message: "No file uploaded",
@@ -54,6 +55,7 @@ export class UploadController {
                 },
             });
         } catch (error) {
+            logger.error("Error in uploadFile:", error);
             if (error instanceof HttpException) {
                 logger.error(`File upload failed: ${error.message}`);
                 return response.status(error.status).json({
@@ -65,6 +67,7 @@ export class UploadController {
             return response.status(500).json({
                 success: false,
                 message: "An unexpected error occurred during file upload",
+                error: error.message || "Unknown error",
             });
         }
     }
