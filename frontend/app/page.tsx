@@ -1,6 +1,6 @@
 "use client";
 
-import { CloudUploadIcon } from "lucide-react";
+import { CloudUploadIcon, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "~/components/ui/button";
 import {
@@ -195,7 +195,14 @@ function UploadForm() {
                 type="submit"
                 className="w-full"
               >
-                {isPending ? "Uploading..." : "Submit"}
+                {isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Uploading...
+                  </>
+                ) : (
+                  "Submit"
+                )}
               </Button>
             </form>
           </Form>
