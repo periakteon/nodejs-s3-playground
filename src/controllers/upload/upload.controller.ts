@@ -80,7 +80,7 @@ export class UploadController {
         }
     }
 
-    @Get("/:id")
+    @Get("/id/:id")
     async getUpload(@Param("id") id: string, @Res() response: Response) {
         try {
             const upload = await this.uploadService.getUploadById(id);
