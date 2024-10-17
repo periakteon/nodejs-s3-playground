@@ -48,9 +48,11 @@ export class RabbitMQService {
     async close() {
         if (this.channel) {
             await this.channel.close();
+            logger.info("✅ RabbitMQ channel closed");
         }
         if (this.connection) {
             await this.connection.close();
+            logger.info("✅ RabbitMQ connection closed");
         }
     }
 }

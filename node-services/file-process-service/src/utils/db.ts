@@ -47,6 +47,7 @@ export class MongoDB {
         if (this.client) {
             await this.client.close();
             this.db = null;
+            logger.info("✅ MongoDB connection closed");
         }
     }
 

@@ -19,7 +19,6 @@ export class App {
     private rabbitMQService: RabbitMQService;
 
     constructor(Controllers: Function[]) {
-        // initialize express app
         this.app = express();
         this.env = NODE_ENV ?? "development";
         this.host = HOST ?? "localhost";
@@ -27,17 +26,14 @@ export class App {
 
         this.mongodb = MongoDB.getInstance();
 
-        // initialize container (dependency injection)
         useContainer(Container);
+
         this.rabbitMQService = Container.get(RabbitMQService);
 
-        // initialize middlewares
         this.initializeMiddlewares();
 
-        // initialize routes
         this.initializeRoutes(Controllers);
 
-        // initialize error handling
         this.initializeErrorHandling();
     }
 
@@ -88,7 +84,6 @@ export class App {
     public async closeConnections(): Promise<void> {
         await this.rabbitMQService.close();
         await this.mongodb.disconnect();
-        logger.info("Closed all connections");
     }
 
     private initializeMiddlewares(): void {
