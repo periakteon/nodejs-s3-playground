@@ -79,7 +79,7 @@ export class App {
     private async initializeRabbitMQ(): Promise<void> {
         try {
             await this.rabbitMQService.initialize();
-        } catch (error) {
+        } catch (error: unknown) {
             logger.error("Failed to initialize RabbitMQ", error);
             process.exit(1);
         }

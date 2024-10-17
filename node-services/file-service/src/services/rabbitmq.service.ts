@@ -15,7 +15,7 @@ export class RabbitMQService {
             this.channel = await this.connection.createChannel();
             await this.channel.assertQueue("file_processing", { durable: true });
             logger.info("Connected to RabbitMQ");
-        } catch (error) {
+        } catch (error: unknown) {
             logger.error("Failed to connect to RabbitMQ", error);
             throw error;
         }

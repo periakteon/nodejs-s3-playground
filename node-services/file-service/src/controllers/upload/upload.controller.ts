@@ -71,7 +71,7 @@ export class UploadController {
                 message: "File uploaded and queued for processing",
                 data: responseData,
             });
-        } catch (error) {
+        } catch (error: unknown) {
             logger.error("Error in uploadFile:", error);
             if (error instanceof HttpException) {
                 return response.status(error.status).json({
@@ -82,52 +82,8 @@ export class UploadController {
             return response.status(500).json({
                 success: false,
                 message: "An unexpected error occurred during file upload",
-                error: error.message || "Unknown error",
+                error: error instanceof Error ? error.message : "Unknown error",
             });
         }
     }
-
-    // @Get("/all")
-    // async getAllUploads(@Res() response: Response) {
-    //     try {
-    //         const uploads = await this.uploadService.getAllUploads();
-    //         return response.status(200).json({
-    //             success: true,
-    //             data: uploads,
-    //         });
-    //     } catch (error) {
-    //         logger.error("Failed to retrieve all uploads", error);
-    //         return response.status(500).json({
-    //             success: false,
-    //             message: "Failed to retrieve all uploads",
-    //             error: error.message,
-    //         });
-    //     }
-    // }
-
-    // @Get("/id/:id")
-    // async getUpload(@Param("id") id: string, @Res() response: Response) {
-    //     try {
-    //         const upload = await this.uploadService.getUploadById(id);
-
-    //         if (!upload) {
-    //             return response.status(404).json({
-    //                 success: false,
-    //                 message: "Upload not found",
-    //             });
-    //         }
-
-    //         return response.status(200).json({
-    //             success: true,
-    //             data: upload,
-    //         });
-    //     } catch (error) {
-    //         logger.error(`Failed to retrieve upload with id ${id}`, error);
-    //         return response.status(500).json({
-    //             success: false,
-    //             message: "Failed to retrieve upload",
-    //             error: error.message,
-    //         });
-    //     }
-    // }
 }

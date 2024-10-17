@@ -99,8 +99,11 @@ export class S3Service {
                 // check for image corruption
                 await image.stats(); // will throw an error if the image is corrupt
             }
-        } catch (error) {
+        } catch (error: unknown) {
             logger.error("S3 object validation failed:", error);
+            if (error instanceof Error) {
+                throw new HttpException(400, error.message);
+            }
             throw new HttpException(400, "Invalid file");
         }
     }

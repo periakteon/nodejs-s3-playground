@@ -33,7 +33,7 @@ export class S3Service {
 
             await this.s3Client.send(new PutObjectCommand(params));
             return params.Key;
-        } catch (error) {
+        } catch (error: unknown) {
             console.error("Error uploading file to S3:", error);
             throw new HttpException(500, "Error uploading file to S3");
         }
