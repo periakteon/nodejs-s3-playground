@@ -34,13 +34,11 @@ export class RabbitMQService {
             if (msg) {
                 try {
                     const fileMetadata: IFileMetadata = JSON.parse(msg.content.toString());
-                    logger.info("Processing file:", fileMetadata);
                     await this.fileProcessService.processFile(fileMetadata);
                     this.channel.ack(msg);
-                    logger.info("File acknowledged successfully", msg);
                 } catch (error: unknown) {
                     logger.error("Error processing message:", error);
-                    // !!! Nack the message to requeue it if the message is not acknowledged !!!
+                    // !!! Nack (negative acknowledge) the message to requeue it if the message is not acknowledged !!!
                     this.channel.nack(msg, false, true);
                 }
             }

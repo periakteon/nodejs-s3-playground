@@ -14,15 +14,12 @@ export class FileProcessService {
 
     async processFile(fileMetadata: IFileMetadata): Promise<void> {
         try {
-            // Validate the tempS3Key
             if (!this.isValidTempS3Key(fileMetadata.tempS3Key)) {
                 throw new HttpException(400, "Invalid tempS3Key");
             }
 
-            // Move file from temp to public folder
             const publicS3Key = await this.s3Service.moveFileToPublic(fileMetadata.tempS3Key);
 
-            // Save metadata to MongoDB
             await this.uploadService.saveUpload({
                 ...fileMetadata,
                 url: this.s3Service.getPublicUrl(publicS3Key),
@@ -40,8 +37,7 @@ export class FileProcessService {
     }
 
     private isValidTempS3Key(tempS3Key: string): boolean {
-        // Implement your validation logic here
-        // For example, check if the key starts with 'temp/' and has a valid format
+        // !!! Change if the validation logic changes !!!
         return tempS3Key.startsWith("temp/") && tempS3Key.length > 5;
     }
 }
