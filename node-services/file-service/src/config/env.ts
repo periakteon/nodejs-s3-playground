@@ -29,6 +29,9 @@ const environmentSchema = z.object({
     // Logging configuration
     LOG_DIR: z.string().default("../logs"),
     LOG_FORMAT: z.string().default("dev"),
+
+    // RabbitMQ configuration
+    RABBITMQ_URL: z.string().default("amqp://localhost:5672"),
 });
 
 function validateEnvironment() {
@@ -64,4 +67,5 @@ export const {
     LOG_FORMAT,
     // CORS_ORIGIN,
     // CORS_CREDENTIALS,
+    RABBITMQ_URL,
 } = env;

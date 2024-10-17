@@ -18,23 +18,21 @@ export class S3Service {
         });
     }
 
-    async uploadToS3(file: Express.Multer.File): Promise<string> {
+    async uploadToTempS3(file: Express.Multer.File): Promise<string> {
         const params: PutObjectCommandInput = {
             Bucket: AWS_S3_BUCKET,
-            Key: `uploads/${new Date().toLocaleDateString("tr-TR")}/${uuidv4()}-${file.originalname}`,
+            Key: `temp/${new Date().toISOString().split("T")[0]}/${uuidv4()}-${file.originalname}`,
             Body: file.buffer,
             ContentType: file.mimetype,
-            ACL: "public-read",
         };
 
         try {
-            // Check if file.buffer exists and has content
             if (!file.buffer || file.buffer.length === 0) {
                 throw new Error("File buffer is empty or undefined");
             }
 
             await this.s3Client.send(new PutObjectCommand(params));
-            return `https://${AWS_S3_BUCKET}.s3.${AWS_S3_REGION}.amazonaws.com/${params.Key}`;
+            return params.Key;
         } catch (error) {
             console.error("Error uploading file to S3:", error);
             throw new HttpException(500, "Error uploading file to S3");

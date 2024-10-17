@@ -10,6 +10,6 @@ app.listen().catch((error) => {
 });
 
 process.on("SIGINT", async () => {
-    await app.closeDatabase();
+    await app.closeConnections();
     process.exit(0);
 });

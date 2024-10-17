@@ -3,18 +3,18 @@ import express from "express";
 import { useContainer, useExpressServer } from "routing-controllers";
 import Container from "typedi";
 import morgan from "morgan";
-import { NODE_ENV, PORT, LOG_FORMAT, HOST } from "@config/env";
+import { NODE_ENV, PORT, LOG_FORMAT, HOST, RABBITMQ_URL } from "@config/env";
 import { ErrorMiddleware } from "@/middlewares/error.middleware";
 import { logger, stream } from "@/utils/logger";
 import helmet from "helmet";
-import { MongoDB } from "@/utils/db";
+import { RabbitMQService } from "@/services/rabbitmq.service";
 
 export class App {
     public app: express.Application;
     public env: string;
     public host: string;
     public port: string | number;
-    private mongodb: MongoDB;
+    private rabbitMQService: RabbitMQService;
 
     constructor(Controllers: Function[]) {
         // initialize express app
@@ -22,12 +22,10 @@ export class App {
         this.env = NODE_ENV ?? "development";
         this.host = HOST ?? "localhost";
         this.port = PORT ?? 9001;
-        // initialize MongoDB instance
-        this.mongodb = MongoDB.getInstance();
-
         // initialize container (dependency injection)
         useContainer(Container);
-
+        // initialize rabbitmq service
+        this.rabbitMQService = Container.get(RabbitMQService);
         // initialize middlewares
         this.initializeMiddlewares();
 
@@ -39,12 +37,16 @@ export class App {
     }
 
     public async listen() {
-        await this.connectToDatabase();
+        await this.initializeRabbitMQ();
         this.app.listen(this.port, () => {
-            logger.info(`=================================`);
-            logger.info(`======= ENV: ${this.env} =======`);
-            logger.info(`🚀 App listening on the port ${this.host}:${this.port}`);
-            logger.info(`=================================`);
+            logger.info(`==================================================`);
+            logger.info(`=============== ENV: ${this.env} =================`);
+            logger.info(`🚀 App is up and running at ${this.host}:${this.port} 🚀`);
+            logger.info(`==================================================`);
+            logger.info(`✅ RabbitMQ connection initialized successfully`);
+            logger.info(`🐇 RabbitMQ URL: ${RABBITMQ_URL}`);
+            logger.info(`RabbitMQ UI: http://localhost:15672`);
+            logger.info(`==================================================`);
         });
     }
 
@@ -52,18 +54,18 @@ export class App {
         return this.app;
     }
 
-    private async connectToDatabase() {
+    private async initializeRabbitMQ() {
         try {
-            await this.mongodb.connect();
+            await this.rabbitMQService.initialize();
         } catch (error) {
-            logger.error("Failed to connect to MongoDB", error);
+            logger.error("Failed to initialize RabbitMQ", error);
             process.exit(1);
         }
     }
 
-    public async closeDatabase() {
-        await this.mongodb.disconnect();
-        logger.info("Disconnected from MongoDB");
+    public async closeConnections() {
+        await this.rabbitMQService.close();
+        logger.info("Closed RabbitMQ connection");
     }
 
     private initializeMiddlewares() {
@@ -84,8 +86,6 @@ export class App {
     }
 
     private initializeErrorHandling() {
-        this.app.use((err: unknown, req: express.Request, res: express.Response, next: express.NextFunction) => {
-            ErrorMiddleware(err, req, res, next);
-        });
+        this.app.use(ErrorMiddleware);
     }
 }
