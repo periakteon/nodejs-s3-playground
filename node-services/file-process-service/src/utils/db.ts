@@ -22,7 +22,7 @@ export class MongoDB {
         try {
             await this.client.connect();
             this.db = this.client.db();
-            logger.info("Connected to MongoDB");
+            logger.info("Successfully connected to MongoDB");
         } catch (error: unknown) {
             logger.error("Failed to connect to MongoDB", error);
             throw error;
@@ -47,7 +47,7 @@ export class MongoDB {
         if (this.client) {
             await this.client.close();
             this.db = null;
-            logger.info("Disconnected from MongoDB");
+            logger.info("Successfully disconnected from MongoDB");
         }
     }
 }

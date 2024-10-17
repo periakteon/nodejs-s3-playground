@@ -15,6 +15,7 @@ export class App {
     public env: string;
     public host: string;
     public port: string | number;
+    private mongodb: MongoDB;
     private rabbitMQService: RabbitMQService;
 
     constructor(Controllers: Function[]) {
@@ -23,10 +24,13 @@ export class App {
         this.env = NODE_ENV ?? "development";
         this.host = HOST ?? "localhost";
         this.port = PORT ?? 9002;
+
+        this.mongodb = MongoDB.getInstance();
+
         // initialize container (dependency injection)
         useContainer(Container);
-        // initialize rabbitmq service
         this.rabbitMQService = Container.get(RabbitMQService);
+
         // initialize middlewares
         this.initializeMiddlewares();
 
@@ -37,31 +41,35 @@ export class App {
         this.initializeErrorHandling();
     }
 
-    public async listen() {
+    public async listen(): Promise<void> {
         await this.initializeMongoDB();
         await this.initializeRabbitMQ();
         this.app.listen(this.port, () => {
             logger.info(`==================================================`);
             logger.info(`=============== ENV: ${this.env} =================`);
-            logger.info(`🚀 File Process Service is running at ${this.host}:${this.port} 🚀`);
+            logger.info(`🚀 App is up and running at ${this.host}:${this.port} 🚀`);
+            logger.info(`==================================================`);
+            logger.info(`✅ RabbitMQ connection initialized successfully`);
+            logger.info(`🐇 RabbitMQ URL: ${RABBITMQ_URL}`);
+            logger.info(`RabbitMQ UI: http://localhost:15672`);
             logger.info(`==================================================`);
         });
     }
 
-    public getServer() {
+    public getServer(): express.Application {
         return this.app;
     }
 
-    private async initializeMongoDB() {
+    private async initializeMongoDB(): Promise<void> {
         try {
-            await MongoDB.getInstance().connect();
+            await this.mongodb.connect();
         } catch (error: unknown) {
             logger.error("Failed to connect to MongoDB", error);
             process.exit(1);
         }
     }
 
-    private async initializeRabbitMQ() {
+    private async initializeRabbitMQ(): Promise<void> {
         try {
             await this.rabbitMQService.initialize();
         } catch (error) {
@@ -70,13 +78,13 @@ export class App {
         }
     }
 
-    public async closeConnections() {
+    public async closeConnections(): Promise<void> {
         await this.rabbitMQService.close();
-        await MongoDB.getInstance().disconnect();
+        await this.mongodb.disconnect();
         logger.info("Closed all connections");
     }
 
-    private initializeMiddlewares() {
+    private initializeMiddlewares(): void {
         this.app.use(morgan(LOG_FORMAT, { stream }));
         this.app.use(helmet());
         this.app.use(express.json());
@@ -93,7 +101,7 @@ export class App {
         });
     }
 
-    private initializeErrorHandling() {
+    private initializeErrorHandling(): void {
         this.app.use(ErrorMiddleware);
     }
 }
