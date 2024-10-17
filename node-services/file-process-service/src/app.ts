@@ -8,6 +8,7 @@ import { ErrorMiddleware } from "@/middlewares/error.middleware";
 import { logger, stream } from "@/utils/logger";
 import helmet from "helmet";
 import { RabbitMQService } from "@/services/rabbitmq.service";
+import { MongoDB } from "@/utils/db";
 
 export class App {
     public app: express.Application;
@@ -21,7 +22,7 @@ export class App {
         this.app = express();
         this.env = NODE_ENV ?? "development";
         this.host = HOST ?? "localhost";
-        this.port = PORT ?? 9001;
+        this.port = PORT ?? 9002;
         // initialize container (dependency injection)
         useContainer(Container);
         // initialize rabbitmq service
@@ -37,21 +38,27 @@ export class App {
     }
 
     public async listen() {
+        await this.initializeMongoDB();
         await this.initializeRabbitMQ();
         this.app.listen(this.port, () => {
             logger.info(`==================================================`);
             logger.info(`=============== ENV: ${this.env} =================`);
-            logger.info(`🚀 App is up and running at ${this.host}:${this.port} 🚀`);
-            logger.info(`==================================================`);
-            logger.info(`✅ RabbitMQ connection initialized successfully`);
-            logger.info(`🐇 RabbitMQ URL: ${RABBITMQ_URL}`);
-            logger.info(`RabbitMQ UI: http://localhost:15672`);
+            logger.info(`🚀 File Process Service is running at ${this.host}:${this.port} 🚀`);
             logger.info(`==================================================`);
         });
     }
 
     public getServer() {
         return this.app;
+    }
+
+    private async initializeMongoDB() {
+        try {
+            await MongoDB.getInstance().connect();
+        } catch (error: unknown) {
+            logger.error("Failed to connect to MongoDB", error);
+            process.exit(1);
+        }
     }
 
     private async initializeRabbitMQ() {
@@ -65,7 +72,8 @@ export class App {
 
     public async closeConnections() {
         await this.rabbitMQService.close();
-        logger.info("Closed RabbitMQ connection");
+        await MongoDB.getInstance().disconnect();
+        logger.info("Closed all connections");
     }
 
     private initializeMiddlewares() {

@@ -3,11 +3,14 @@ import amqp, { Channel, Connection } from "amqplib";
 import { RABBITMQ_URL } from "@/config/env";
 import { logger } from "@/utils/logger";
 import { IFileMetadata } from "@/interfaces/file-metadata.interface";
+import { FileProcessService } from "@/services/file-process.service";
 
 @Service()
 export class RabbitMQService {
     private connection: Connection | null = null;
     private channel: Channel | null = null;
+
+    constructor(private fileProcessService: FileProcessService) {}
 
     async initialize() {
         try {
@@ -15,17 +18,31 @@ export class RabbitMQService {
             this.channel = await this.connection.createChannel();
             await this.channel.assertQueue("file_processing", { durable: true });
             logger.info("Connected to RabbitMQ");
-        } catch (error) {
+            this.consumeMessages();
+        } catch (error: unknown) {
             logger.error("Failed to connect to RabbitMQ", error);
             throw error;
         }
     }
 
-    async sendToQueue(data: IFileMetadata) {
+    private async consumeMessages() {
         if (!this.channel) {
             throw new Error("RabbitMQ channel not initialized");
         }
-        this.channel.sendToQueue("file_processing", Buffer.from(JSON.stringify(data)), { persistent: true });
+
+        this.channel.consume("file_processing", async (msg) => {
+            if (msg) {
+                try {
+                    const fileMetadata: IFileMetadata = JSON.parse(msg.content.toString());
+                    await this.fileProcessService.processFile(fileMetadata);
+                    this.channel.ack(msg);
+                } catch (error: unknown) {
+                    logger.error("Error processing message:", error);
+                    // Nack the message to requeue it
+                    this.channel.nack(msg, false, true);
+                }
+            }
+        });
     }
 
     async close() {

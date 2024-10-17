@@ -11,7 +11,6 @@ export class MongoDB {
         this.client = new MongoClient(MONGO_CONNECTION_URL);
     }
 
-    // singleton instance
     public static getInstance(): MongoDB {
         if (!MongoDB.instance) {
             MongoDB.instance = new MongoDB();
@@ -24,13 +23,12 @@ export class MongoDB {
             await this.client.connect();
             this.db = this.client.db();
             logger.info("Connected to MongoDB");
-        } catch (error) {
+        } catch (error: unknown) {
             logger.error("Failed to connect to MongoDB", error);
             throw error;
         }
     }
 
-    // get database instance
     public getDb(): Db {
         if (!this.db) {
             throw new Error("Database not connected. Call connect() first.");

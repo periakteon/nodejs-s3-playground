@@ -24,6 +24,7 @@ export const upload = multer({
         fileSize: MAX_FILE_SIZE,
     },
     fileFilter: (_req, file, cb) => {
+        // TODO: We can remove this file filter and let the file-process-service handle the file type validation
         const allowedMimes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
         if (allowedMimes.includes(file.mimetype)) {
             cb(null, true);

@@ -1,27 +1,25 @@
 import { Service } from "typedi";
 import { UploadRepository } from "@repositories/upload.repository";
 import { IDBUpload } from "@interfaces/db-upload.interface";
-import { S3Service } from "./s3.service";
 import { IFileMetadata } from "@/interfaces/file-metadata.interface";
 
 @Service()
 export class UploadService {
     private uploadRepository: UploadRepository;
-    private s3Service: S3Service;
 
     constructor() {
         this.uploadRepository = new UploadRepository();
-        this.s3Service = new S3Service();
     }
 
-    async saveUpload(uploadData: IFileMetadata): Promise<IDBUpload> {
-        const url = await this.s3Service.uploadToS3(file);
-
+    async saveUpload(fileMetadata: IFileMetadata & { url: string }): Promise<IDBUpload> {
         const newUpload = await this.uploadRepository.create({
-            firstName: uploadData.firstName,
-            lastName: uploadData.lastName,
-            filename: file.originalname,
-            url,
+            firstName: fileMetadata.firstName,
+            lastName: fileMetadata.lastName,
+            filename: fileMetadata.filename,
+            url: fileMetadata.url,
+            mimeType: fileMetadata.mimeType,
+            size: fileMetadata.size,
+            uploadedAt: fileMetadata.uploadedAt,
         });
         return newUpload;
     }

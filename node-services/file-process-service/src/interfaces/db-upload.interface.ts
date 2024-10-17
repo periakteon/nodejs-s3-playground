@@ -6,6 +6,9 @@ export interface IDBUpload {
     lastName: string;
     filename: string;
     url: string;
+    mimeType: string;
+    size: number;
+    uploadedAt: Date;
     createdAt: Date;
     updatedAt: Date;
 }

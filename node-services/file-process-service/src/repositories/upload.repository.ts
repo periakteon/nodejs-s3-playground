@@ -8,7 +8,7 @@ export class UploadRepository {
     private collection: Collection<IDBUpload>;
 
     constructor() {
-        this.collection = MongoDB.getInstance().getCollection<IDBUpload>("uploads");
+        this.collection = MongoDB.getInstance().getCollection<IDBUpload>("masum-dev-s3-rabbitmq");
     }
 
     async create(upload: Omit<IDBUpload, "_id" | "createdAt" | "updatedAt">): Promise<IDBUpload> {
@@ -28,7 +28,7 @@ export class UploadRepository {
             }
 
             return { ...newUpload, _id: result.insertedId };
-        } catch (error) {
+        } catch (error: unknown) {
             logger.error("Error in create method:", error);
 
             if (error instanceof MongoError) {
@@ -51,7 +51,7 @@ export class UploadRepository {
     async findById(id: string): Promise<IDBUpload | null> {
         try {
             return await this.collection.findOne({ _id: new ObjectId(id) });
-        } catch (error) {
+        } catch (error: unknown) {
             logger.error("Error in findById:", error);
 
             if (error instanceof MongoError) {
@@ -69,7 +69,7 @@ export class UploadRepository {
     async findAll(): Promise<IDBUpload[]> {
         try {
             return await this.collection.find({}).toArray();
-        } catch (error) {
+        } catch (error: unknown) {
             logger.error("Error in findAll:", error);
 
             if (error instanceof MongoError) {
