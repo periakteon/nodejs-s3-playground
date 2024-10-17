@@ -28,27 +28,6 @@ export class S3Service {
         });
     }
 
-    async uploadToTempS3(file: Express.Multer.File): Promise<string> {
-        const params: PutObjectCommandInput = {
-            Bucket: AWS_S3_BUCKET,
-            Key: `temp/${new Date().toISOString().split("T")[0]}/${uuidv4()}-${file.originalname}`,
-            Body: file.buffer,
-            ContentType: file.mimetype,
-        };
-
-        try {
-            if (!file.buffer || file.buffer.length === 0) {
-                throw new Error("File buffer is empty or undefined");
-            }
-
-            await this.s3Client.send(new PutObjectCommand(params));
-            return params.Key;
-        } catch (error: unknown) {
-            console.error("Error uploading file to S3:", error);
-            throw new HttpException(500, "Error uploading file to S3");
-        }
-    }
-
     async moveFileToPublic(tempS3Key: string): Promise<string> {
         const publicS3Key = tempS3Key.replace("temp/", "public/");
 
@@ -112,6 +91,7 @@ export class S3Service {
                 // this is a temporary limit, we can change it later
                 const maxWidth = 5000;
                 const maxHeight = 5000;
+
                 if ((metadata.width && metadata.width > maxWidth) || (metadata.height && metadata.height > maxHeight)) {
                     throw new Error("Image dimensions exceed the maximum allowed");
                 }
@@ -127,8 +107,8 @@ export class S3Service {
 
     private async streamToBuffer(stream: Readable): Promise<Buffer> {
         return new Promise((resolve, reject) => {
-            const chunks: any[] = [];
-            stream.on("data", (chunk) => chunks.push(chunk));
+            const chunks: Buffer[] = [];
+            stream.on("data", (chunk: Buffer | Uint8Array) => chunks.push(Buffer.from(chunk)));
             stream.on("error", reject);
             stream.on("end", () => resolve(Buffer.concat(chunks)));
         });
