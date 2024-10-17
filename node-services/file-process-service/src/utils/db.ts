@@ -47,7 +47,10 @@ export class MongoDB {
         if (this.client) {
             await this.client.close();
             this.db = null;
-            logger.info("Successfully disconnected from MongoDB");
         }
+    }
+
+    public isConnected(): boolean {
+        return this.db !== null;
     }
 }

@@ -6,9 +6,18 @@ import { logger } from "@/utils/logger";
 
 export class UploadRepository {
     private collection: Collection<IDBUpload>;
+    private mongodb: MongoDB;
 
     constructor() {
-        this.collection = MongoDB.getInstance().getCollection<IDBUpload>("masum-dev-s3-rabbitmq");
+        this.mongodb = MongoDB.getInstance();
+        this.initializeCollection();
+    }
+
+    private async initializeCollection(): Promise<void> {
+        if (!this.mongodb.isConnected()) {
+            await this.mongodb.connect();
+        }
+        this.collection = this.mongodb.getCollection<IDBUpload>("masum-dev-s3-rabbitmq");
     }
 
     async create(upload: Omit<IDBUpload, "_id" | "createdAt" | "updatedAt">): Promise<IDBUpload> {
