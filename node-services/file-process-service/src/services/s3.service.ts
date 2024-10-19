@@ -11,6 +11,7 @@ import { HttpException } from "@/exceptions/HttpException";
 import { logger } from "@/utils/logger";
 import { Readable } from "stream";
 import sharp from "sharp";
+import { generatePublicS3Key, generateThumbnailKey, streamToBuffer } from "@/utils/s3Utils";
 
 @Service()
 export class S3Service {
@@ -26,12 +27,8 @@ export class S3Service {
         });
     }
 
-    getPublicUrl(publicS3Key: string): string {
-        return `https://${AWS_S3_BUCKET}.s3.${AWS_S3_REGION}.amazonaws.com/${publicS3Key}`;
-    }
-
     async moveFileToPublic(tempS3Key: string): Promise<string> {
-        const publicS3Key = tempS3Key.replace("temp/", "public/");
+        const publicS3Key = generatePublicS3Key(tempS3Key);
 
         try {
             await this.validateS3Object(tempS3Key);
@@ -85,7 +82,7 @@ export class S3Service {
 
             if (ContentType.startsWith("image/")) {
                 const stream = Body as Readable;
-                const buffer = await this.streamToBuffer(stream);
+                const buffer = await streamToBuffer(stream);
                 const image = sharp(buffer);
                 const metadata = await image.metadata();
 
@@ -107,29 +104,22 @@ export class S3Service {
         }
     }
 
-    private async streamToBuffer(stream: Readable): Promise<Buffer> {
-        return new Promise((resolve, reject) => {
-            const chunks: Buffer[] = [];
-            stream.on("data", (chunk: Buffer | Uint8Array) => chunks.push(Buffer.from(chunk)));
-            stream.on("error", reject);
-            stream.on("end", () => resolve(Buffer.concat(chunks)));
-        });
-    }
-
     async getFileBuffer(key: string): Promise<Buffer> {
         const { Body } = await this.s3Client.send(new GetObjectCommand({ Bucket: AWS_S3_BUCKET, Key: key }));
-        return await this.streamToBuffer(Body as Readable);
+        return await streamToBuffer(Body as Readable);
     }
 
-    async uploadThumbnail(key: string, buffer: Buffer): Promise<void> {
+    async uploadThumbnail(originalKey: string, size: string, buffer: Buffer): Promise<string> {
+        const thumbnailKey = generateThumbnailKey(originalKey, size);
         await this.s3Client.send(
             new PutObjectCommand({
                 Bucket: AWS_S3_BUCKET,
-                Key: key,
+                Key: thumbnailKey,
                 Body: buffer,
                 ContentType: "image/jpeg",
                 ContentLength: buffer.length,
             })
         );
+        return thumbnailKey;
     }
 }

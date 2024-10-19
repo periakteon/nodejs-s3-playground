@@ -5,6 +5,7 @@ import { IFileMetadata } from "@/interfaces/file-metadata.interface";
 import { logger } from "@/utils/logger";
 import { HttpException } from "@/exceptions/HttpException";
 import sharp from "sharp";
+import { getPublicUrl, validateTempS3Key } from "@/utils/s3Utils";
 
 @Service()
 export class FileProcessService {
@@ -15,9 +16,7 @@ export class FileProcessService {
 
     async processFile(fileMetadata: IFileMetadata): Promise<void> {
         try {
-            if (!this.isValidTempS3Key(fileMetadata.tempS3Key)) {
-                throw new HttpException(400, "Invalid tempS3Key");
-            }
+            validateTempS3Key(fileMetadata.tempS3Key);
 
             const originalBuffer = await this.s3Service.getFileBuffer(fileMetadata.tempS3Key);
             const publicS3Key = await this.s3Service.moveFileToPublic(fileMetadata.tempS3Key);
@@ -27,7 +26,7 @@ export class FileProcessService {
 
             await this.uploadService.saveUpload({
                 ...fileMetadata,
-                url: this.s3Service.getPublicUrl(publicS3Key),
+                url: getPublicUrl(publicS3Key),
                 thumbnails: thumbnailUrls,
             });
 
@@ -47,6 +46,8 @@ export class FileProcessService {
         const thumbnails: { [key: string]: Buffer } = {};
 
         for (const size of sizes) {
+            // I used "cover" to make sure the image is not distorted
+            // for other options, see: https://sharp.pixelplumbing.com/api-resize#resize
             thumbnails[`${size}x${size}`] = await sharp(buffer).resize(size, size, { fit: "cover" }).toBuffer();
         }
 
@@ -60,15 +61,10 @@ export class FileProcessService {
         const thumbnailUrls: { [key: string]: string } = {};
 
         for (const [size, buffer] of Object.entries(thumbnails)) {
-            const thumbnailKey = `${originalKey.replace("public/", "public/thumbnails/")}/${size}`;
-            await this.s3Service.uploadThumbnail(thumbnailKey, buffer);
-            thumbnailUrls[size] = this.s3Service.getPublicUrl(thumbnailKey);
+            const thumbnailKey = await this.s3Service.uploadThumbnail(originalKey, size, buffer);
+            thumbnailUrls[size] = getPublicUrl(thumbnailKey);
         }
 
         return thumbnailUrls;
-    }
-
-    private isValidTempS3Key(tempS3Key: string): boolean {
-        return tempS3Key.startsWith("temp/") && tempS3Key.length > 5;
     }
 }
