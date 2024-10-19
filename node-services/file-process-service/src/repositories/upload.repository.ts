@@ -28,6 +28,7 @@ export class UploadRepository {
                 ...upload,
                 createdAt: now,
                 updatedAt: now,
+                thumbnails: upload.thumbnails,
             };
 
             const result = await this.collection.insertOne(newUpload);

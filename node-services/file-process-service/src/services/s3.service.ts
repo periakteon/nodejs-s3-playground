@@ -1,13 +1,11 @@
 import { Service } from "typedi";
 import {
     S3Client,
-    PutObjectCommand,
-    PutObjectCommandInput,
     CopyObjectCommand,
     DeleteObjectCommand,
     GetObjectCommand,
+    PutObjectCommand,
 } from "@aws-sdk/client-s3";
-import { v4 as uuidv4 } from "uuid";
 import { AWS_S3_BUCKET, AWS_S3_REGION, AWS_S3_ACCESS_KEY, AWS_S3_SECRET_KEY } from "@/config/env";
 import { HttpException } from "@/exceptions/HttpException";
 import { logger } from "@/utils/logger";
@@ -26,6 +24,10 @@ export class S3Service {
                 secretAccessKey: AWS_S3_SECRET_KEY,
             },
         });
+    }
+
+    getPublicUrl(publicS3Key: string): string {
+        return `https://${AWS_S3_BUCKET}.s3.${AWS_S3_REGION}.amazonaws.com/${publicS3Key}`;
     }
 
     async moveFileToPublic(tempS3Key: string): Promise<string> {
@@ -81,14 +83,12 @@ export class S3Service {
                 throw new Error("Invalid file type");
             }
 
-            // additional checks
             if (ContentType.startsWith("image/")) {
                 const stream = Body as Readable;
                 const buffer = await this.streamToBuffer(stream);
                 const image = sharp(buffer);
                 const metadata = await image.metadata();
 
-                // this is a temporary limit, we can change it later
                 const maxWidth = 5000;
                 const maxHeight = 5000;
 
@@ -96,7 +96,6 @@ export class S3Service {
                     throw new Error("Image dimensions exceed the maximum allowed");
                 }
 
-                // check for image corruption
                 await image.stats(); // will throw an error if the image is corrupt
             }
         } catch (error: unknown) {
@@ -117,7 +116,20 @@ export class S3Service {
         });
     }
 
-    getPublicUrl(publicS3Key: string): string {
-        return `https://${AWS_S3_BUCKET}.s3.${AWS_S3_REGION}.amazonaws.com/${publicS3Key}`;
+    async getFileBuffer(key: string): Promise<Buffer> {
+        const { Body } = await this.s3Client.send(new GetObjectCommand({ Bucket: AWS_S3_BUCKET, Key: key }));
+        return await this.streamToBuffer(Body as Readable);
+    }
+
+    async uploadThumbnail(key: string, buffer: Buffer): Promise<void> {
+        await this.s3Client.send(
+            new PutObjectCommand({
+                Bucket: AWS_S3_BUCKET,
+                Key: key,
+                Body: buffer,
+                ContentType: "image/jpeg",
+                ContentLength: buffer.length,
+            })
+        );
     }
 }

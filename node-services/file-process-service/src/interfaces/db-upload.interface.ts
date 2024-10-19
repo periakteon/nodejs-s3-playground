@@ -11,4 +11,5 @@ export interface IDBUpload {
     uploadedAt: Date;
     createdAt: Date;
     updatedAt: Date;
+    thumbnails: { [key: string]: string };
 }

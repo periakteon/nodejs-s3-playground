@@ -6,4 +6,5 @@ export interface IFileMetadata {
     mimeType: string;
     size: number;
     uploadedAt: Date;
+    thumbnails: { [key: string]: string };
 }

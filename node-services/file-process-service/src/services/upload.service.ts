@@ -20,6 +20,7 @@ export class UploadService {
             mimeType: fileMetadata.mimeType,
             size: fileMetadata.size,
             uploadedAt: fileMetadata.uploadedAt,
+            thumbnails: fileMetadata.thumbnails,
         });
         return newUpload;
     }
