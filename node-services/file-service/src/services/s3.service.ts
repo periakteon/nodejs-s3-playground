@@ -3,6 +3,7 @@ import { S3Client, PutObjectCommand, PutObjectCommandInput } from "@aws-sdk/clie
 import { v4 as uuidv4 } from "uuid";
 import { AWS_S3_BUCKET, AWS_S3_REGION, AWS_S3_ACCESS_KEY, AWS_S3_SECRET_KEY } from "@/config/env";
 import { HttpException } from "@/exceptions/HttpException";
+import { DateTime } from "luxon";
 
 @Service()
 export class S3Service {
@@ -21,7 +22,7 @@ export class S3Service {
     async uploadToTempS3(file: Express.Multer.File): Promise<string> {
         const params: PutObjectCommandInput = {
             Bucket: AWS_S3_BUCKET,
-            Key: `temp/${new Date().toISOString().split("T")[0]}/${uuidv4()}-${file.originalname}`,
+            Key: `temp/${DateTime.now().toFormat("yyyy-MM-dd")}/${uuidv4()}-${file.originalname}`,
             Body: file.buffer,
             ContentType: file.mimetype,
         };

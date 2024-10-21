@@ -1,6 +1,4 @@
 import multer from "multer";
-// import fs from "fs";
-// import path from "path";
 
 // const UPLOAD_DIR = "uploads/";
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
@@ -12,7 +10,7 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
         cb(null, UPLOAD_DIR);
     },
     filename: (_req, file, cb) => {
-        const uniqueSuffix = `${Date.now().toString()}-${Math.round(Math.random() * 1e9)}`;
+        const uniqueSuffix = `${DateTime.utc().toFormat("yyyyMMdd-HHmmss")}-${Math.round(Math.random() * 1e9)}`;
         cb(null, `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`);
     },
 }); */

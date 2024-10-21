@@ -1,3 +1,4 @@
+import { DateTime } from "luxon";
 export interface IFileMetadata {
     firstName: string;
     lastName: string;
@@ -5,5 +6,5 @@ export interface IFileMetadata {
     tempS3Key: string;
     mimeType: string;
     size: number;
-    uploadedAt: Date;
+    uploadedAt: DateTime;
 }

@@ -1,12 +1,12 @@
-import { JsonController, Post, Body, Res, UploadedFile, Get, Param } from "routing-controllers";
+import { JsonController, Post, Body, Res, UploadedFile } from "routing-controllers";
 import { Service } from "typedi";
 import { REQ_UploadDto } from "@/dtos/upload.dto";
-import { Response } from "express";
+import { Express, Response } from "express";
+import { DateTime } from "luxon";
 import { logger } from "@/utils/logger";
 import { S3Service } from "@/services/s3.service";
 import { RabbitMQService } from "@/services/rabbitmq.service";
 import { HttpException } from "@/exceptions/HttpException";
-import { Express } from "express";
 import { IFileMetadata } from "@/interfaces/file-metadata.interface";
 import { IUploadResponse } from "@/interfaces/upload-response.interface";
 
@@ -52,7 +52,7 @@ export class UploadController {
                 tempS3Key: tempS3Key,
                 mimeType: file.mimetype,
                 size: file.size,
-                uploadedAt: new Date(),
+                uploadedAt: DateTime.now(),
             };
 
             await this.rabbitMQService.sendToQueue(fileMetadata);

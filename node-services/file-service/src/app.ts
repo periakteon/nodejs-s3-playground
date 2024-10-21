@@ -3,10 +3,11 @@ import express from "express";
 import { useContainer, useExpressServer } from "routing-controllers";
 import Container from "typedi";
 import morgan from "morgan";
+import helmet from "helmet";
+import { Settings } from "luxon";
 import { NODE_ENV, PORT, LOG_FORMAT, HOST, RABBITMQ_URL } from "@config/env";
 import { ErrorMiddleware } from "@/middlewares/error.middleware";
 import { logger, stream } from "@/utils/logger";
-import helmet from "helmet";
 import { RabbitMQService } from "@/services/rabbitmq.service";
 
 export class App {
@@ -17,22 +18,15 @@ export class App {
     private rabbitMQService: RabbitMQService;
 
     constructor(Controllers: Function[]) {
-        // initialize express app
         this.app = express();
         this.env = NODE_ENV ?? "development";
         this.host = HOST ?? "localhost";
         this.port = PORT ?? 9001;
-        // initialize container (dependency injection)
+        Settings.defaultZone = "utc";
         useContainer(Container);
-        // initialize rabbitmq service
         this.rabbitMQService = Container.get(RabbitMQService);
-        // initialize middlewares
         this.initializeMiddlewares();
-
-        // initialize routes
         this.initializeRoutes(Controllers);
-
-        // initialize error handling
         this.initializeErrorHandling();
     }
 
