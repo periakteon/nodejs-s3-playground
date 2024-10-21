@@ -23,11 +23,11 @@ export function generateThumbnailKey(originalKey: string, size: string): string 
 export async function streamToBuffer(stream: Readable): Promise<Buffer> {
     return new Promise((resolve, reject) => {
         const chunks: Buffer[] = [];
-        stream.on("data", function (chunk: Buffer | Uint8Array) {
+        stream.on("data", (chunk: Buffer | Uint8Array) => {
             chunks.push(Buffer.from(chunk));
         });
         stream.on("error", reject);
-        stream.on("end", function () {
+        stream.on("end", () => {
             resolve(Buffer.concat(chunks));
         });
     });

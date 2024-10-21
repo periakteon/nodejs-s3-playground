@@ -1,5 +1,4 @@
 import { Service } from "typedi";
-import { IUploadRepository } from "@/interfaces/upload-repository.interface";
 import { UploadRepository } from "@repositories/upload.repository";
 import { IDBUpload } from "@interfaces/db-upload.interface";
 import { IFileMetadata } from "@/interfaces/file-metadata.interface";
