@@ -9,6 +9,7 @@ import { logger, stream } from "@/utils/logger";
 import helmet from "helmet";
 import { RabbitMQService } from "@/services/rabbitmq.service";
 import { MongoDB } from "@/utils/db";
+import { Settings } from "luxon";
 
 export class App {
     public app: express.Application;
@@ -20,9 +21,12 @@ export class App {
 
     constructor(Controllers: Function[]) {
         this.app = express();
+
         this.env = NODE_ENV ?? "development";
         this.host = HOST ?? "localhost";
         this.port = PORT ?? 9002;
+
+        Settings.defaultZone = "utc";
 
         this.mongodb = MongoDB.getInstance();
 
@@ -31,9 +35,7 @@ export class App {
         this.rabbitMQService = Container.get(RabbitMQService);
 
         this.initializeMiddlewares();
-
         this.initializeRoutes(Controllers);
-
         this.initializeErrorHandling();
     }
 

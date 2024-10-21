@@ -19,12 +19,17 @@ export class App {
 
     constructor(Controllers: Function[]) {
         this.app = express();
+
         this.env = NODE_ENV ?? "development";
         this.host = HOST ?? "localhost";
         this.port = PORT ?? 9001;
+
         Settings.defaultZone = "utc";
+
         useContainer(Container);
+
         this.rabbitMQService = Container.get(RabbitMQService);
+
         this.initializeMiddlewares();
         this.initializeRoutes(Controllers);
         this.initializeErrorHandling();
