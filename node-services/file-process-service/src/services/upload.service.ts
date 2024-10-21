@@ -8,8 +8,8 @@ import { IFileMetadata } from "@/interfaces/file-metadata.interface";
 export class UploadService {
     private uploadRepository: IUploadRepository;
 
-    constructor() {
-        this.uploadRepository = new UploadRepository();
+    constructor(uploadRepository: IUploadRepository) {
+        this.uploadRepository = uploadRepository;
     }
 
     async saveUpload(fileMetadata: IFileMetadata & { url: string }): Promise<IDBUpload> {
