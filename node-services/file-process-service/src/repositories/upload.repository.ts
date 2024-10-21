@@ -1,3 +1,4 @@
+import { Service } from "typedi";
 import { MongoDB } from "@/utils/db";
 import { IDBUpload } from "@/interfaces/db-upload.interface";
 import { Collection, ObjectId, MongoError } from "mongodb";
@@ -5,6 +6,7 @@ import { HttpException } from "@/exceptions/HttpException";
 import { logger } from "@/utils/logger";
 import { IUploadRepository } from "@/interfaces/upload-repository.interface";
 
+@Service()
 export class UploadRepository implements IUploadRepository {
     private collection: Collection<IDBUpload>;
     private mongodb: MongoDB;
