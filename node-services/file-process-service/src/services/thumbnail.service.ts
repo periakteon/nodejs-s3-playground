@@ -13,10 +13,10 @@ export class ThumbnailService {
     }
 
     private async generateThumbnails(buffer: Buffer): Promise<{ [key: string]: Buffer }> {
-        const sizes = [100, 200, 300, 400, 500];
+        const THUMBNAIL_SIZES = [100, 200, 300, 400, 500];
         const thumbnails: { [key: string]: Buffer } = {};
 
-        for (const size of sizes) {
+        for (const size of THUMBNAIL_SIZES) {
             thumbnails[`${size}x${size}`] = await sharp(buffer).resize(size, size, { fit: "cover" }).toBuffer();
         }
 
