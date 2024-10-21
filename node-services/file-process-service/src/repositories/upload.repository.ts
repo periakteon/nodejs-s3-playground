@@ -5,6 +5,7 @@ import { Collection, ObjectId, MongoError } from "mongodb";
 import { HttpException } from "@/exceptions/HttpException";
 import { logger } from "@/utils/logger";
 import { IUploadRepository } from "@/interfaces/upload-repository.interface";
+import { DateTime } from "luxon";
 
 @Service()
 export class UploadRepository implements IUploadRepository {
@@ -25,7 +26,7 @@ export class UploadRepository implements IUploadRepository {
 
     async create(upload: Omit<IDBUpload, "_id" | "createdAt" | "updatedAt">): Promise<IDBUpload> {
         try {
-            const now = new Date();
+            const now = DateTime.now().toJSDate();
 
             const newUpload: IDBUpload = {
                 ...upload,

@@ -10,6 +10,8 @@ import helmet from "helmet";
 import { RabbitMQService } from "@/services/rabbitmq.service";
 import { MongoDB } from "@/utils/db";
 import { Settings } from "luxon";
+import { S3Client } from "@aws-sdk/client-s3";
+import { createS3Client } from "./config/factories/s3-client.factory";
 
 export class App {
     public app: express.Application;
@@ -31,6 +33,7 @@ export class App {
         this.mongodb = MongoDB.getInstance();
 
         useContainer(Container);
+        Container.set(S3Client, createS3Client());
 
         this.rabbitMQService = Container.get(RabbitMQService);
 

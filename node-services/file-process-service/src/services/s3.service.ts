@@ -6,7 +6,7 @@ import {
     GetObjectCommand,
     PutObjectCommand,
 } from "@aws-sdk/client-s3";
-import { AWS_S3_BUCKET, AWS_S3_REGION, AWS_S3_ACCESS_KEY, AWS_S3_SECRET_KEY } from "@/config/env";
+import { AWS_S3_BUCKET } from "@/config/env";
 import { HttpException } from "@/exceptions/HttpException";
 import { logger } from "@/utils/logger";
 import { Readable } from "stream";
@@ -17,14 +17,8 @@ import { generatePublicS3Key, generateThumbnailKey, streamToBuffer } from "@/uti
 export class S3Service {
     private s3Client: S3Client;
 
-    constructor() {
-        this.s3Client = new S3Client({
-            region: AWS_S3_REGION,
-            credentials: {
-                accessKeyId: AWS_S3_ACCESS_KEY,
-                secretAccessKey: AWS_S3_SECRET_KEY,
-            },
-        });
+    constructor(s3Client: S3Client) {
+        this.s3Client = s3Client;
     }
 
     async moveFileToPublic(tempS3Key: string): Promise<string> {
