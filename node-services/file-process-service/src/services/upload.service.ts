@@ -15,7 +15,7 @@ export class UploadService {
             url: fileMetadata.url,
             mimeType: fileMetadata.mimeType,
             size: fileMetadata.size,
-            uploadedAt: fileMetadata.uploadedAt.toJSDate(),
+            uploadedAt: fileMetadata.uploadedAt,
             thumbnails: fileMetadata.thumbnails,
         });
         return newUpload;
