@@ -5,7 +5,7 @@ import { IFileMetadata } from "@/interfaces/file-metadata.interface";
 
 @Service()
 export class UploadService {
-    constructor(private uploadRepository: UploadRepository) {}
+    constructor(private readonly uploadRepository: UploadRepository) {}
 
     async saveUpload(fileMetadata: IFileMetadata & { url: string }): Promise<IDBUpload> {
         const newUpload = await this.uploadRepository.create({

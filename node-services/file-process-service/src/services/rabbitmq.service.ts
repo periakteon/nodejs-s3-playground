@@ -10,7 +10,7 @@ export class RabbitMQService {
     private connection: Connection | null = null;
     private channel: Channel | null = null;
 
-    constructor(private fileProcessService: FileProcessService) {}
+    constructor(private readonly fileProcessService: FileProcessService) {}
 
     async initialize() {
         try {

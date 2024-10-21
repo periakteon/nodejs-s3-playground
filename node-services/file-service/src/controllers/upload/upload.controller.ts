@@ -14,8 +14,8 @@ import { IUploadResponse } from "@/interfaces/upload-response.interface";
 @JsonController("/upload")
 export class UploadController {
     constructor(
-        private s3Service: S3Service,
-        private rabbitMQService: RabbitMQService
+        private readonly s3Service: S3Service,
+        private readonly rabbitMQService: RabbitMQService
     ) {}
 
     @Post()
@@ -56,8 +56,6 @@ export class UploadController {
             };
 
             await this.rabbitMQService.sendToQueue(fileMetadata);
-
-            logger.info(`File uploaded to temp S3 and queued for processing: ${tempS3Key}`);
 
             const responseData: IUploadResponse = {
                 tempS3Key: tempS3Key,

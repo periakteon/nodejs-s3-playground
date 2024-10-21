@@ -5,7 +5,7 @@ import { getPublicUrl } from "@/utils/s3Utils";
 
 @Service()
 export class ThumbnailService {
-    constructor(private s3Service: S3Service) {}
+    constructor(private readonly s3Service: S3Service) {}
 
     async generateAndUploadThumbnails(originalBuffer: Buffer, publicS3Key: string): Promise<{ [key: string]: string }> {
         const thumbnails = await this.generateThumbnails(originalBuffer);

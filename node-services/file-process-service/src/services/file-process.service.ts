@@ -10,9 +10,9 @@ import { getPublicUrl, validateTempS3Key } from "@/utils/s3Utils";
 @Service()
 export class FileProcessService {
     constructor(
-        private s3Service: S3Service,
-        private uploadService: UploadService,
-        private thumbnailService: ThumbnailService
+        private readonly s3Service: S3Service,
+        private readonly uploadService: UploadService,
+        private readonly thumbnailService: ThumbnailService
     ) {}
 
     async processFile(fileMetadata: IFileMetadata): Promise<void> {
